@@ -1,0 +1,7 @@
+#Insert a code that prints the square of 0 up to a number
+#exluding that number
+#using int(input()) will take the input value as 10
+#as an example
+a = int(input())
+for i in range(a):
+    print(i*i)
