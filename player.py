@@ -11,9 +11,11 @@ class player(object):
     attack = [pygame.transform.scale(pygame.image.load(os.path.join("png", 'Attack (' + str(x) + ').png')), (75, 75)) for x in range(1, 10)]
 
     jumpList = [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4,
-                4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1,
-                -1, -1, -1, -1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3,
-                -3, -3, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4]
+                4, 4, 4, 4, 4, 4, 4]
+    fallList = [1, 1, 1, 1, 1, 1]
+##                  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1,
+##                -1, -1, -1, -1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3,
+##                -3, -3, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4]
 
     def __init__(self, x, y, width, height):
         self.x = x
@@ -22,7 +24,7 @@ class player(object):
         self.height = height
         self.jumping = False
         self.jumpCount = 0
-        self.jumpCount = 0
+        self.fallCount = 0
         self.running = False
         self.runningBack = False
         self.runCount = 0
@@ -33,6 +35,7 @@ class player(object):
         self.attacking = False
         self.attCount = 0
         self.coolDown = True
+        self.falling = False
 
     def draw(self, screen):
             if self.attacking and self.coolDown:
@@ -42,11 +45,12 @@ class player(object):
                 self.attCount += 1
                 self.hit_box = pygame.Rect((self.x + 4, self.y), (self.width - 24, self.height - 13))
                 self.coolDown = False
+                
             elif self.jumping:
                 self.y -= self.jumpList[self.jumpCount] * 1.2
                 screen.blit(self.jump[self.jumpCount // 18], (self.x, self.y))
                 self.jumpCount += 1
-                if self.jumpCount > 108:
+                if self.jumpCount > len(self.jumpList)-1:
                     self.jumpCount = 0
                     self.jumping = False
                     self.runCount = 0
@@ -58,13 +62,7 @@ class player(object):
                 screen.blit(self.run[self.runCount // 6], (self.x, self.y))
                 self.runCount += 1
                 self.hit_box = pygame.Rect((self.x + 4, self.y), (self.width - 24, self.height - 13))
-
-            elif not(self.running) and not(self.runningBack) and not(self.walking):
-                if self.idleCount > 42:
-                    self.idleCount = 0
-                screen.blit(self.idle[self.idleCount // 6], (self.x, self.y))
-                self.idleCount += 1
-
+                
             elif self.runningBack:
                 if self.runCount > 42:
                     self.runCount = 0
@@ -78,6 +76,21 @@ class player(object):
                 screen.blit(self.walk[self.walkCount // 6], (self.x, self.y))
                 self.hit_box = pygame.Rect((self.x + 4, self.y), (self.width - 24, self.height - 10))
                 self.walkCount += 1
+                
+            elif self.falling:
+                self.y += self.fallList[self.fallCount] * 2.4
+                screen.blit(self.jump[self.jumpCount // 18], (self.x, self.y))
+                self.fallCount += 1
+                if self.fallCount > len(self.fallList)-1:
+                    self.fallCount = 0
+                    self.runCount = 0
+                self.hit_box = pygame.Rect((self.x + 4, self.y), (self.width - 24, self.height - 10))
+
+            elif not(self.running) and not(self.runningBack) and not(self.walking) and not(self.falling):
+            if self.idleCount > 42:
+                self.idleCount = 0
+            screen.blit(self.idle[self.idleCount // 6], (self.x, self.y))
+            self.idleCount += 1
 
     def get_hits(self, tiles):
         hits = []
@@ -101,25 +114,24 @@ class player(object):
 
     def checkCollisionsy(self, collisions):
         for tile in collisions:
-            if self.jumpList[self.jumpCount] * 1.2 < 0:  # Hit tile from the top
+            if self.falling:  # Hit tile from the top
                 self.jumping = False
                 self.y = tile.y - self.height + 598
-            '''
+            
             # Hit tile from the bottom
-            elif self.y > tile.y - 10:
-                self.y = self.height + 548
+            elif self.y > tile.y:
                 self.jumping = False
-            '''
-
+                self.falling = False
+        
     def checkCollisions(self, tiles):
         collisions = self.get_hits(tiles)
-        if len(collisions) == 0 and not self.jumping and (self.walking or self.running or self.runningBack):
-            self.y = tiles[-1].rect.y - self.height + 598  # self.height + 548
+        if len(collisions) == 0 and not self.jumping:
+            self.falling = True
             return
-        if self.jumping:
+        if self.jumping or self.falling:
             self.checkCollisionsy(collisions)
-        elif self.walking or self.running or self.runningBack:
-            self.checkCollisionsx(collisions)
+##        elif self.walking or self.running or self.runningBack:
+##            self.checkCollisionsx(collisions)
 
     def update(self, tiles, screen):
         self.draw(screen)
