@@ -1,7 +1,8 @@
 import sys
 import pygame
 import buttons
-import scroll
+import scroll2
+from options import options_menu
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -49,6 +50,7 @@ while True:
     continueGame.draw()
     options = buttons.button(140, 40, width/2.4, height/2.4, mouse, screen, 'Options', 35, 20, 10)
     options.draw()
+    o_coord = options.coordinates()
     quit = buttons.button(140, 40, width/2.4, height/2, mouse, screen, 'Quit', 35, 40, 10)
     quit.draw()
     q_coord = quit.coordinates()
@@ -72,7 +74,9 @@ while True:
             elif newGame_coord[0] <= mouse[0] <= newGame_coord[1] and newGame_coord[2] <= mouse[1] <= newGame_coord[3]:
                 mixer.music.pause()
                 fade()
-                scroll.game_screen(speed)
+                scroll2.game_screen()
+            '''elif o_coord[0] <= mouse[0] <= o_coord[1] and o_coord[2] <= mouse[1] <= o_coord[3]:
+                options_menu()'''
 
     #updates the frames of the game
     pygame.display.update()
