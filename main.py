@@ -2,7 +2,7 @@ import sys
 import pygame
 import buttons
 import scroll2
-from options import options_menu
+#from options import options_menu
 
 pygame.init()
 clock = pygame.time.Clock()
