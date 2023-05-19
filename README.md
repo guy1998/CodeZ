@@ -1,7 +1,7 @@
 # CodeZ
 CodeZ Program Version 1.0 06/17/2022
 
-GENERAL USAGE NOTES
+GENERAL USAGE NOTES:
 --------------------
 -This game allows the user to play and learn coding at the same time. The user has to go through the level 
 and then at the end of the level, he has to solve a programming question in python.
